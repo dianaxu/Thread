@@ -20,6 +20,7 @@
         android:id="@+id/pb_progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
+        android:max="100"
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_fileName" />
 
