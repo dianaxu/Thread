@@ -28,6 +28,7 @@ public class DownloadService extends Service {
     public static final String ACTION_START = "ACTION_START";
     public static final String ACTION_PAUSE = "ACTION_PAUSE";
     public static final String ACTION_UPDATE = "ACTION_UPDATE";
+    public static final String ACTION_FINISHED = "ACTION_FINISHED";
 
     public static final int MSG_INIT = 0;
     private DownloadTask mTask = null;
@@ -39,7 +40,7 @@ public class DownloadService extends Service {
                 case MSG_INIT:
                     FileInfo fileinfo = (FileInfo) msg.obj;
                     //启动下载任务
-                    mTask = new DownloadTask(DownloadService.this, fileinfo);
+                    mTask = new DownloadTask(DownloadService.this, fileinfo, 3);
                     mTask.downLoad();
                     break;
                 default:
@@ -53,7 +54,7 @@ public class DownloadService extends Service {
         if (ACTION_START.equals(intent.getAction())) {
             FileInfo fileinfo = (FileInfo) intent.getSerializableExtra("fileInfo");
             // 启动初始化线程 下载任务
-            new InitThread(fileinfo).start();
+            DownloadTask.mExecutorService.execute(new InitThread(fileinfo));
         } else if (ACTION_PAUSE.equals(intent.getAction())) {
             //暂停下载任务
             if (mTask != null) {

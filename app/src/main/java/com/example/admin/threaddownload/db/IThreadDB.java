@@ -16,7 +16,7 @@ public interface IThreadDB {
     void insertThread(ThreadInfo threadInfo);
 
     //删除线程信息
-    void deleteThread(String url, int thread_id);
+    void deleteThread(String url);
 
     //更新线程下载进度
     void updateThread(String url, int thread_id, int finished);

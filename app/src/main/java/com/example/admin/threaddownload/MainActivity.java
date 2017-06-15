@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,28 +21,35 @@ import android.widget.Toast;
 import com.example.admin.threaddownload.entities.FileInfo;
 import com.example.admin.threaddownload.services.DownloadService;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-    private TextView tvFileName = null;
-    private ProgressBar pbProgress = null;
-    private Button btnStart = null;
-    private Button btnPause = null;
+public class MainActivity extends Activity {
+    private ListView lvFile;
+    private FileListAdapter mAdapter;
+
     public static MainActivity mMainActivity;
-    private FileInfo mFileInfo;
-
-    public Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Toast.makeText(mMainActivity, "下载成功", Toast.LENGTH_LONG).show();
-        }
-    };
+    private List<FileInfo> mFileList = new ArrayList<>();
+//
+//    public Handler handler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            Toast.makeText(mMainActivity, "下载成功", Toast.LENGTH_LONG).show();
+//        }
+//    };
 
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DownloadService.ACTION_UPDATE.equals(intent.getAction())) {
                 int finised = intent.getIntExtra("finished", 0);
-                pbProgress.setProgress(finised);
+                int id = intent.getIntExtra("id", 0);
+                mAdapter.updateProgress(id, finised);
+            } else if (DownloadService.ACTION_FINISHED.equals(intent.getAction())) {
+                mAdapter.updateProgress(intent.getIntExtra("id", 0), 0);
+                Toast.makeText(mMainActivity, "下载成功", Toast.LENGTH_LONG).show();
             }
         }
     };
@@ -51,21 +59,28 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tvFileName = (TextView) findViewById(R.id.tv_fileName);
-        pbProgress = (ProgressBar) findViewById(R.id.pb_progress);
-        btnStart = (Button) findViewById(R.id.btn_start);
-        btnPause = (Button) findViewById(R.id.btn_pause);
-
-        btnStart.setOnClickListener(this);
-        btnPause.setOnClickListener(this);
-        mFileInfo = new FileInfo(0,
-                "http://www.imooc.com/mobile/mukewang.apk",
-                "mukewang.apk", 0, 0);
+        lvFile = (ListView) findViewById(R.id.lv_file);
+        setAdapter();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DownloadService.ACTION_UPDATE);
+        filter.addAction(DownloadService.ACTION_FINISHED);
         registerReceiver(mReceiver, filter);
         mMainActivity = this;
+    }
+
+    private void setAdapter() {
+        mFileList.add(new FileInfo(0,
+                "http://www.imooc.com/mobile/mukewang.apk",
+                "mukewang.apk", 0, 0));
+        mFileList.add(new FileInfo(1,
+                "http://gdown.baidu.com/data/wisegame/d08a178fb05acea2/aiqiyi_80880.apk",
+                "aiyiqi.apk", 0, 0));
+        mFileList.add(new FileInfo(2,
+                "http://sw.bos.baidu.com/sw-search-sp/software/a40ee9c29a4dd/QQ_8.9.3.21149_setup.exe",
+                "qq.apk", 0, 0));
+        mAdapter = new FileListAdapter(this, mFileList);
+        lvFile.setAdapter(mAdapter);
     }
 
     @Override
@@ -76,39 +91,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (KeyEvent.KEYCODE_BACK == keyCode && btnStart != null) {
+       /* if (KeyEvent.KEYCODE_BACK == keyCode ) {
             btnStart.performClick();
-        }
+        }*/
         return super.onKeyUp(keyCode, event);
     }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_start:
-                startDownload();
-                break;
-            case R.id.btn_pause:
-                pauseDownload();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void startDownload() {
-        Intent intent = new Intent(MainActivity.this, DownloadService.class);
-        intent.setAction(DownloadService.ACTION_START);
-        intent.putExtra("fileInfo", mFileInfo);
-        startService(intent);
-    }
-
-    private void pauseDownload() {
-        Intent intent = new Intent(MainActivity.this, DownloadService.class);
-        intent.setAction(DownloadService.ACTION_PAUSE);
-        intent.putExtra("fileInfo", mFileInfo);
-        startService(intent);
-    }
-
 
 }
