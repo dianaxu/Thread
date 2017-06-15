@@ -17,13 +17,21 @@ import java.util.List;
 
 public class ThreadDB implements IThreadDB {
     private DBHelper mHelper = null;
+    private static ThreadDB mThreadDB = null;
 
-    public ThreadDB(Context context) {
+    public static synchronized ThreadDB getInstance(Context context) {
+        if (mThreadDB == null) {
+            mThreadDB = new ThreadDB(context);
+        }
+        return mThreadDB;
+    }
+
+    private ThreadDB(Context context) {
         mHelper = new DBHelper(context);
     }
 
     @Override
-    public void insertThread(ThreadInfo threadInfo) {
+    public synchronized void insertThread(ThreadInfo threadInfo) {
         SQLiteDatabase db = mHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("thread_id", threadInfo.getId());
@@ -36,15 +44,15 @@ public class ThreadDB implements IThreadDB {
     }
 
     @Override
-    public void deleteThread(String url, int thread_id) {
+    public synchronized void deleteThread(String url) {
         SQLiteDatabase db = mHelper.getWritableDatabase();
         db.delete("thread_info", "url = ? and thread_id = ?",
-                new String[]{url, String.valueOf(thread_id)});
+                new String[]{url});
         db.close();
     }
 
     @Override
-    public void updateThread(String url, int thread_id, int finished) {
+    public synchronized void updateThread(String url, int thread_id, int finished) {
         SQLiteDatabase db = mHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("finished", finished);
@@ -54,7 +62,7 @@ public class ThreadDB implements IThreadDB {
     }
 
     @Override
-    public List<ThreadInfo> getThreads(String url) {
+    public synchronized List<ThreadInfo> getThreads(String url) {
         SQLiteDatabase db = mHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("select * from thread_info where url = ?", new String[]{url});
 
@@ -75,7 +83,7 @@ public class ThreadDB implements IThreadDB {
     }
 
     @Override
-    public boolean isExists(String url, int thread_id) {
+    public synchronized boolean isExists(String url, int thread_id) {
         SQLiteDatabase db = mHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("select * from thread_info where url = ? and thread_id = ?",
                 new String[]{url, String.valueOf(thread_id)});

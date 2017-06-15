@@ -10,33 +10,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.admin.threaddownload.MainActivity">
 
-    <TextView
-        android:id="@+id/tv_fileName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="网易新闻" />
-
-    <ProgressBar
-        android:id="@+id/pb_progress"
-        style="?android:attr/progressBarStyleHorizontal"
+    <ListView
+        android:id="@+id/lv_file"
         android:layout_width="match_parent"
-        android:max="100"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_fileName" />
+        android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/btn_pause"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/pb_progress"
-        android:text="暂停" />
 
-    <Button
-        android:id="@+id/btn_start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/pb_progress"
-        android:layout_toLeftOf="@id/btn_pause"
-        android:text="下载" />
 </RelativeLayout>
